@@ -42,9 +42,9 @@ def getAllSaves():
             except KeyError:
                 genLog = 'Cannot load Generation\'s data'
 
-            saveNumbers.append('Save id : %s, Generations saved : %d, ( %s )'
+            saveNumbers.append('Save id : %s, Generations saved : %d,\n  ( %s )'
                                % (entry_name, len(generations), genLog))
-    saveNumbers.sort(reverse = True)
+    saveNumbers.sort()
 
     return saveNumbers
 

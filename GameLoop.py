@@ -75,6 +75,8 @@ class Game(object):
         sid = input('Choose snake starting size ( default - 21, min - 3 ) : ')
         self.snakeStartingSize = CONSTANTS.StringToInt(sid, 21, 3, 200)
 
+        print('Settings confirmed starting...')
+
         self.tileX = (int)(ScreenWidth / tilesX)
         self.tileY = (int)(ScreenHeight / tilesY)
         self.sizeX = tilesX

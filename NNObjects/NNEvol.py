@@ -23,6 +23,8 @@ mutations = 0
 genes = 0
 
 def mixMetrix(A, B, rand):
+    # randomly create a new metrix out of two existing with same shape,
+    # with a slight chance of getting a new value.
     mix = np.copy(A)
     global mutations, genes
     for x in range(B.shape[0]):
@@ -48,6 +50,7 @@ def mixMetrix(A, B, rand):
     return mix
 
 def mix1d(A, B, rand):
+    # mixes a 1 dimentional metrix (bias layer)
     mix = np.copy(A)
     for x in range(A.size):
         if(random.random() < rand):
@@ -82,6 +85,7 @@ class EvNeuralNet(object):
             self.memoryBios = np.zeros([self.memory])
 
     def createChild(parentA, parentB):
+        #used to create a child out of two parents, with mixed values in layers, as well as a chance for mutation.
         ret = EvNeuralNet(*parentA.init_params, init = False)
         ret.hlayer1 = mixMetrix(parentA.hlayer1, parentB.hlayer1, mutationRate)
         #ret.hlayer1 = relu(ret.hlayer1)
@@ -106,6 +110,7 @@ class EvNeuralNet(object):
         return (sigmoid(C))
 
     def save(self, name, dir = CONSTANTS.HOLDFOLDER):
+        # save the brain with np.savez with we can easily load at any time.
         np.savez(dir + name + '.npz', hl1=self.hlayer1, hl2=self.hlayer2, ol=self.outlayer,
                  bl1=self.bl1, bl2=self.bl2, bo=self.bo, memoryLayer=self.memoryLayer,
                  memoryBios=self.memoryBios, init_params=self.init_params, fitness = self.fitness)
@@ -133,6 +138,8 @@ class EvNeuralTrainer(object):
         if(loadID < 0):
             loadID = None
         if(loadID):
+            # if we loading an old simulation we need to first make sure,
+            # we are using the right setting for out neural network
             dirName = CONSTANTS.FOLDER(loadID)
             loadData = np.load(dirName + CONSTANTS.SETTINGS)
             input_nodes = int(loadData['input_nodes'])
@@ -168,6 +175,9 @@ class EvNeuralTrainer(object):
         self.gainStreak = 0
         self.time = time.clock()
 
+        # here we creating the files that would store all the setting's regarding this run
+        # so first of all we are making sure we have the main data file
+        # then we initializing all the data files regarding this run.
         try:
             load = np.load(CONSTANTS.MAIN_DATA)
             self.tid = int(load['id'] + 1)
@@ -191,6 +201,8 @@ class EvNeuralTrainer(object):
                  maxFitness = 0, bestGeneration = -1, highestScore = self.highestScore, level = 1)
 
         if(loadID):
+            # after we created all the important setting we just load out old, generations
+            # as well as creating a few totally new networks.
             dirName = CONSTANTS.FOLDER(loadID)
             gen = np.load(dirName + CONSTANTS.NN_SAVE_DATA)
 
@@ -236,6 +248,9 @@ class EvNeuralTrainer(object):
         return nexte
 
     def pickRandomElement(self, n):
+        # here we getting the a random agent but the higher his
+        # fitness the higher the chance he will be picked
+        # agent.probability = agent.fitness / Total_generation_fitness
         x = len(self._used)
         r = random.random()
         index = -1
@@ -248,10 +263,10 @@ class EvNeuralTrainer(object):
     def newGeneration(self):
         global mutations, genes
 
+        # here we creating a new generation saving the current if needed,
+        # we also logging any changes and the stats of the current run.
         self._population = []
         totalScore = 0
-        self._used.sort(key = sortByScore)
-        self._population = []
         for nn in self._used:
             totalScore += nn.fitness
 
@@ -271,6 +286,8 @@ class EvNeuralTrainer(object):
             net = EvNeuralNet.createChild(a, a)
             self._population.append(net)
 
+        # here we sorting the generation members so we can pick the best performing one
+        self._used.sort(key = sortByScore)
         print("-------------------------------------------------------------------------------------")
         print("Generation %d level %d stats --- max fitness: %.2f, min fitness: %.2f, Gen time: %.2f" %
               (self.generation, self.level, self._used[0].fitness, self._used[-1].fitness, time.clock() - self.time))

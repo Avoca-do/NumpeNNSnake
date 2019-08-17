@@ -7,7 +7,6 @@ from Food import FoodGenerator
 from NNObjects.NNEvol import EvNeuralTrainer, EvNeuralNet
 import utility.constants as CONSTANTS
 
-
 class Game(object):
     def __init__(self, tilesX, tilesY, ScreenWidth, ScreenHeight, Title):
         load = input("Load saved (y/n) : ")
@@ -97,20 +96,27 @@ class Game(object):
         self.resetSpeed = False
         self.maxSteps = 75
 
+        #initialize pygame and create window
         pygame.init()
         self.run = True
         self.win = pygame.display.set_mode((ScreenWidth, ScreenHeight))
-
+        #initialize out neural trainer and create/load the first population
         self.EvN = EvNeuralTrainer(self, self.populationSize, (self.fieldOfView ** 2) + 3,
                                    self.hidden_nodes1, self.hidden_nodes2, self.memoryNodes,
                                    4, loadID = loadID, stepsLevel = highestScore, loadNumber = loadNumber)
 
         #self.snakeList.append(SnakeObject(self.centerX, self.centerY, self))
+        #set brains to the starting snakes. Not self.AiC is used to train multiple networks at once,
+        #note: multiply agents at once, might result in poor, performence, due to the fact that each Snake.
+        #Might "steal" the food of the other one so they would have to "race" each other with might not be what we want.
+        #it might be really simple to add different "foods" for each snake, by giving them unique id for each snake,
+        #then we would need to "not show" the uninteractable food for each snake.
         for i in range(self.AiC):
             snake = SnakeObject(self.centerX, self.centerY, self)
             snake.setNN(self.EvN._population[i])
             self.snakeList.append(snake)
 
+        #create borders
         for x in range(tilesX):
             self.addTile(Tile(x, 0, -1))
             self.addTile(Tile(x, tilesY - 1, -1))
@@ -132,6 +138,8 @@ class Game(object):
                 self.snakeList.append(snake)
 
     def input_handle(self):
+        #user interactible "thread" or "main thread" handles user inputs.
+        #solver freezes in the run time.
         while self.run:
             pygame.time.delay(10)
             for event in pygame.event.get():
@@ -228,6 +236,8 @@ class Game(object):
         reset = False
         for i in range(len(self.snakeList)):
             if(not self.snakeList[i].alive):
+                #the game was initially made for players.
+                #so we need to cheack if its an agent, and respawn the snake with new brain.
                 self.snakeList[i].updateNNScore()
                 NN = self.EvN.getNewNN()
                 if(NN is not None):

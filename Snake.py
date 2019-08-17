@@ -25,6 +25,8 @@ class SnakeObject(object):
             self.body.append(Cord2d(x, y))
 
     def updateNNScore(self):
+        # give the brain a score, i found that having much bigger rewards for improvement,
+        # make much better results
         if(self.brain is not None):
             self.brain.alive = False
             self.brain.score = self.score

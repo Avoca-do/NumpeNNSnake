@@ -1,4 +1,4 @@
-# NumpeNNSnake
+# NumpyNNSnake
 My self learning snake game, using python - pygame, numpy.
 
 
